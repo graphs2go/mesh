@@ -15,16 +15,15 @@ Medical Subject Heading (MeSH) Thesaurus transformation pipelines.
 
 ### Download the MeSH thesaurus
 
-1. [Download the MeSH thesaurus in RDF](https://nlmpubs.nlm.nih.gov/projects/mesh/rdf/).
-2. Move the `.nt.gz` file to `data/input`.
+[Download the MeSH thesaurus in N-Triples](https://nlmpubs.nlm.nih.gov/projects/mesh/rdf/) to `data/input`.
 
 The resulting directory tree should resemble:
 
 * `data/`
   * `input/`
-    * `mesh2024.nt.gz`
+    * `mesh2024.nt`
 
-or similar, depending on the release date.
+or similar, depending on the release year.
 
 ## Running
 
