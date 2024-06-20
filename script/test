@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -e
+
+cd "$(dirname "$0")/.."
+
+poetry run black --check medline_plus tests
+poetry run mypy medline_plus tests
+poetry run ruff medline_plus tests
+export PYTHONPATH=$PWD
+poetry run pytest tests

@@ -1,0 +1,27 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.dagster]
+
+[tool.poetry]
+name = "mesh"
+version = "0.1.0"
+description = ""
+authors = ["Minor Gordon <minorg@server.fake>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.2.0"
+mypy = "^1.8.0"
+pytest = "^8.0.1"
+ruff = "^0.2.2"
+dagster-webserver = "^1.6.5"
+graphs2go = { path = "../shared", develop = true }
+isort = "^5.13.2"
+
+[tool.ruff]
+src = ["medline_plus"]
