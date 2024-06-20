@@ -87,7 +87,7 @@ def __transform_descriptor_properties(
             continue
         yield interchange.Property.builder(
             descriptor.iri, property_predicate, property_value
-        )
+        ).build()
 
 
 def __transform_descriptor_relationships(

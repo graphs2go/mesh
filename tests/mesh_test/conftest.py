@@ -5,13 +5,13 @@ from pathlib import Path
 import pytest
 from returns.maybe import Some
 
+from graphs2go.models import interchange, skos
+from graphs2go.resources import DirectoryInputConfig, OutputConfig, RdfStoreConfig
+from graphs2go.utils import configure_markus, load_dotenv
 from mesh import assets
 from mesh.find_releases import find_releases
 from mesh.models import Release, Thesaurus
 from mesh.paths import INPUT_DIRECTORY_PATH, RDF_STORE_DIRECTORY_PATH
-from graphs2go.models import interchange, skos
-from graphs2go.resources import DirectoryInputConfig, OutputConfig, RdfStoreConfig
-from graphs2go.utils import configure_markus, load_dotenv
 
 load_dotenv()
 configure_markus()
@@ -30,10 +30,10 @@ def interchange_graph(
 
 @pytest.fixture(scope="session")
 def interchange_graph_descriptor(
-    rdf_store_config: RdfStoreConfig, thesaurus: Thesaurus
+    rdf_store_config: RdfStoreConfig, thesaurus_descriptor: Thesaurus.Descriptor
 ) -> interchange.Graph.Descriptor:
     return assets.interchange_graph(
-        rdf_store_config=rdf_store_config, thesaurus=thesaurus
+        rdf_store_config=rdf_store_config, thesaurus=thesaurus_descriptor
     )  # type: ignore
 
 

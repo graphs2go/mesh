@@ -6,9 +6,6 @@ from dagster import (
     asset,
     get_dagster_logger,
 )
-from mesh.transform_thesaurus_to_interchange_models import (
-    transform_thesaurus_to_interchange_models,
-)
 from rdflib import URIRef
 from returns.maybe import Some
 from tqdm import tqdm
@@ -23,6 +20,9 @@ from graphs2go.resources import DirectoryInputConfig, RdfStoreConfig
 from mesh.find_releases import find_releases
 from mesh.models import Release, Thesaurus
 from mesh.paths import INPUT_DIRECTORY_PATH
+from mesh.transform_thesaurus_to_interchange_models import (
+    transform_thesaurus_to_interchange_models,
+)
 
 # Static partitions: scan the release directory once at startup
 releases_partitions_definition = StaticPartitionsDefinition(
@@ -58,6 +58,15 @@ def release(context: AssetExecutionContext) -> Release:
     return Release.from_partition_key(context.partition_key)
 
 
+skos_file = build_skos_file_asset(
+    partitions_def=Some(releases_partitions_definition),
+    rdf_formats=(rdf.Format.NTRIPLES, rdf.Format.TURTLE),
+)
+
+
+skos_graph = build_skos_graph_asset(partitions_def=Some(releases_partitions_definition))
+
+
 @asset(code_version="1", partitions_def=releases_partitions_definition)
 def thesaurus(
     rdf_store_config: RdfStoreConfig, release: Release
@@ -87,12 +96,3 @@ def thesaurus(
             identifier=release.identifier,
             rdf_store_descriptor=rdf_store.descriptor,
         )
-
-
-skos_file = build_skos_file_asset(
-    partitions_def=Some(releases_partitions_definition),
-    rdf_formats=(rdf.Format.NTRIPLES, rdf.Format.TURTLE),
-)
-
-
-skos_graph = build_skos_graph_asset(partitions_def=Some(releases_partitions_definition))

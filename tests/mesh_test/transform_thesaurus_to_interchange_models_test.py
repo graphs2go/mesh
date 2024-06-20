@@ -12,7 +12,7 @@ def test_transform(thesaurus_descriptor: Thesaurus.Descriptor) -> None:
     expected_interchange_model_class_set = {
         interchange.Label,
         interchange.Node,
-        # interchange.Property,
+        interchange.Property,
         interchange.Relationship,
     }
     for interchange_model in transform_thesaurus_to_interchange_models(
