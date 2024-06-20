@@ -1,3 +1,4 @@
+from functools import cache
 from typing import TYPE_CHECKING
 
 from rdflib import RDFS
@@ -15,6 +16,7 @@ class TreeNumber(rdf.NamedModel):
         self.__thesaurus = thesaurus
 
     @property
+    @cache
     def category(self) -> "Category":
         category_letter = self.label.split(".", 1)[0][0]
         for category in self.__thesaurus.categories:

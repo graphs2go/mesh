@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from rdflib import URIRef
+
 from graphs2go.models import rdf
 from mesh.models.concept import Concept
 from mesh.models.tree_number import TreeNumber
@@ -33,19 +35,10 @@ class Descriptor(rdf.NamedModel):
         super().__init__(resource)
         self.__thesaurus = thesaurus
 
-    def broader_descriptors(self) -> Iterable[Descriptor]:
-        """
-        Yield broader concepts in the SKOS sense of "concept" i.e., MeSH descriptors, not MeSH concepts.
-        """
-
-        broader_descriptor_resource: rdf.NamedResource
-        for broader_descriptor_resource in self.resource.values(
-            MESHV.broaderDescriptor, rdf.Resource.ValueMappers.named_resource
-        ):
-            broader_descriptor = Descriptor(
-                resource=broader_descriptor_resource, thesaurus=self.__thesaurus
-            )
-            yield broader_descriptor
+    def broader_descriptor_iris(self) -> Iterable[URIRef]:
+        return self.resource.values(
+            MESHV.broaderDescriptor, rdf.Resource.ValueMappers.iri
+        )
 
     def concepts(self) -> Iterable[Concept]:
         """

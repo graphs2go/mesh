@@ -49,7 +49,17 @@ class Thesaurus(rdf.Graph[rdf.Model]):
             )
         )
 
+    def descriptor_by_iri(self, iri: URIRef) -> Descriptor:
+        return Descriptor(
+            resource=rdf.NamedResource(graph=self.rdflib_graph, iri=iri),
+            thesaurus=self,
+        )
+
     def descriptors(self) -> Iterable[Descriptor]:
+        for descriptor_iri in self.descriptor_iris():
+            yield self.descriptor_by_iri(descriptor_iri)
+
+    def descriptor_iris(self) -> Iterable[URIRef]:
         # The MeSH RDF doesn't have rdfs:subClassOf mesh:Descriptor statements in it, so we have to check the subclasses individually.
         for descriptor_rdf_type in Descriptor.RDF_TYPES:
             for descriptor_iri in self.rdflib_graph.subjects(
@@ -57,13 +67,14 @@ class Thesaurus(rdf.Graph[rdf.Model]):
             ):
                 if not isinstance(descriptor_iri, URIRef):
                     continue
-                yield Descriptor(
-                    resource=rdf.NamedResource(
-                        graph=self.rdflib_graph, iri=descriptor_iri
-                    ),
-                    thesaurus=self,
-                )
+                yield descriptor_iri
 
     @property
+    @cache
+    def iri(self) -> URIRef:
+        return URIRef(f"http://id.nlm.nih.gov/mesh/{self.year}/")
+
+    @property
+    @cache
     def year(self) -> int:
-        return int(self.identifier)
+        return int(self.identifier.rsplit(":", 1)[-1])

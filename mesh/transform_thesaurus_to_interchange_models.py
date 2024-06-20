@@ -1,144 +1,149 @@
 from collections.abc import Iterable
+from multiprocessing import Queue, JoinableQueue
 
-from rdflib import SKOS, URIRef
+from rdflib import URIRef, SKOS, Literal
 from returns.maybe import Some
-from returns.pipeline import is_successful
 
-from graphs2go.models import interchange, skos
-from mesh.models import Concept, Label, Thesaurus
+from graphs2go.models import interchange
+from graphs2go.models.label_type import LabelType
+from graphs2go.transformers import parallel_transform
+from mesh.models import Thesaurus, Descriptor, Term
 
-_CONCEPT_BATCH_SIZE = 100
-
-
-def __transform_labels(model: skos.LabeledModel) -> Iterable[interchange.Model]:
-    for label_type, label in model.lexical_labels():
-        assert isinstance(label, Label)
-        yield interchange.Label.builder(
-            literal_form=label.literal_form,
-            subject=model,
-            type_=Some(label_type),
-            iri=Some(label.iri),
-        ).set_created(label.created.value_or(None)).set_modified(
-            label.modified.value_or(None)
-        ).build()
+_DESCRIPTOR_BATCH_SIZE = 100
+_IN_PROCESS = True
 
 
-def __transform_concept(
-    *, concept: Concept, concept_scheme_iri: URIRef
+def __transform_descriptor(
+    *, concept_scheme_iri: URIRef, descriptor: Descriptor
 ) -> Iterable[interchange.Model]:
-    yield interchange.Node.builder(iri=concept.iri).add_type(SKOS.Concept).set_created(
-        concept.created.value_or(None)
-    ).set_modified(concept.modified.value_or(None)).build()
+    yield from __transform_descriptor_labels(descriptor)
 
-    yield from __transform_labels(concept)
+    yield from __transform_descriptor_relationships(
+        concept_scheme_iri=concept_scheme_iri, descriptor=descriptor
+    )
 
-    # concept, skos:inScheme, concept scheme
-    yield interchange.Relationship.builder(
-        object_=concept_scheme_iri, predicate=SKOS.inScheme, subject=concept
-    ).build()
 
-    # Handle skos:definition specially since it's a subgraph and not a literal
-    for definition in concept.definitions():
-        definition_value = definition.value
-        if not is_successful(definition_value):
-            continue
-        yield interchange.Property.builder(
-            object_=definition_value.unwrap(),
-            predicate=SKOS.definition,
-            subject=concept,
-            iri=Some(definition.iri),
-        ).set_created(definition.created.value_or(None)).set_modified(
-            definition.modified.value_or(None)
-        ).set_source(
-            definition.source.value_or(None)
+def _transform_descriptor_consumer(
+    input_: Thesaurus.Descriptor,
+    output_queue: Queue,
+    work_queue: JoinableQueue,
+) -> None:
+    with Thesaurus.open(input_, read_only=True) as thesaurus:
+        while True:
+            descriptor_iris: tuple[URIRef, ...] | None = work_queue.get()
+
+            if descriptor_iris is None:
+                work_queue.task_done()
+                break  # Signal from the producer there's no more work
+
+            interchange_models: list[interchange.Model] = []  # type: ignore
+            for descriptor_iri in descriptor_iris:
+                interchange_models.extend(
+                    __transform_descriptor(
+                        concept_scheme_iri=thesaurus.iri,
+                        descriptor=thesaurus.descriptor_by_iri(descriptor_iri),
+                    )
+                )
+            output_queue.put(tuple(interchange_models))
+            work_queue.task_done()
+
+
+def __transform_descriptor_labels(
+    descriptor: Descriptor,
+) -> Iterable[interchange.Model]:
+    def transform_mesh_term_to_interchange_label(
+        *, term_: Term, type_: LabelType
+    ) -> interchange.Label:
+        return interchange.Label.builder(
+            literal_form=Literal(term_.pref_label),
+            subject=descriptor.iri,
+            type_=Some(type_),
         ).build()
 
-    # skos:notation statements
-    for notation in concept.notations():
-        yield interchange.Property.builder(
-            object_=notation, predicate=SKOS.notation, subject=concept
-        ).build()
+    yield transform_mesh_term_to_interchange_label(
+        term_=descriptor.preferred_concept.preferred_term, type_=LabelType.PREFERRED
+    )
 
-    # All skos:note sub-properties
-    for note_predicate, note in concept.notes():
-        yield interchange.Property.builder(
-            object_=note, predicate=note_predicate, subject=concept
-        ).build()
-
-    # All skos:semanticRelation sub-properties
-    for semantic_relation_predicate, related_concept in concept.semantic_relations():
-        relationship_builder = interchange.Relationship.builder(
-            object_=related_concept,
-            predicate=semantic_relation_predicate,
-            subject=concept,
+    for concept in descriptor.concepts():
+        yield transform_mesh_term_to_interchange_label(
+            term_=concept.preferred_term, type_=LabelType.ALTERNATIVE
         )
-        if isinstance(related_concept, Concept):
-            relationship_builder.set_created(
-                related_concept.created.value_or(None)
-            ).set_modified(related_concept.modified.value_or(None))
-        yield relationship_builder.build()
+
+        for term in concept.terms():
+            yield transform_mesh_term_to_interchange_label(
+                term_=term, type_=LabelType.ALTERNATIVE
+            )
 
 
-# def _transform_concept_consumer(
-#     input_: tuple[URIRef, Thesaurus.Descriptor],
-#     output_queue: Queue,
-#     work_queue: JoinableQueue,
-# ) -> None:
-#     (concept_scheme_iri, thesaurus_descriptor) = input_
-#
-#     with Thesaurus.open(thesaurus_descriptor, read_only=True) as thesaurus:
-#         while True:
-#             concept_iris: tuple[URIRef, ...] | None = work_queue.get()
-#
-#             if concept_iris is None:
-#                 work_queue.task_done()
-#                 break  # Signal from the producer there's no more work
-#
-#             interchange_models: list[interchange.Model] = []  # type: ignore
-#             for concept_iri in concept_iris:
-#                 interchange_models.extend(
-#                     __transform_concept(
-#                         concept_scheme_iri=concept_scheme_iri,
-#                         concept=thesaurus.concept_by_iri(concept_iri),
-#                     )
-#                 )
-#             output_queue.put(tuple(interchange_models))
-#             work_queue.task_done()
-#
-#
-# def _transform_concept_producer(
-#     input_: Thesaurus.Descriptor, work_queue: JoinableQueue
-# ) -> None:
-#     concept_iris_batch: list[URIRef] = []
-#     with Thesaurus.open(input_, read_only=True) as thesaurus:
-#         for concept_iri in thesaurus.concept_iris:
-#             concept_iris_batch.append(concept_iri)
-#             if len(concept_iris_batch) == _CONCEPT_BATCH_SIZE:
-#                 work_queue.put(tuple(concept_iris_batch))
-#                 concept_iris_batch = []
-#
-#     if concept_iris_batch:
-#         work_queue.put(tuple(concept_iris_batch))
+def __transform_descriptor_relationships(
+    *, concept_scheme_iri: URIRef, descriptor: Descriptor
+) -> Iterable[interchange.Model]:
+    has_broader_descriptor = False
+    for broader_descriptor_iri in descriptor.broader_descriptor_iris():
+        yield interchange.Relationship.builder(
+            descriptor.iri, SKOS.broader, broader_descriptor_iri
+        ).build()
+        yield interchange.Relationship.builder(
+            broader_descriptor_iri, SKOS.narrower, descriptor.iri
+        ).build()
+        has_broader_descriptor = True
+
+    if has_broader_descriptor:
+        yield interchange.Relationship.builder(
+            descriptor.iri, SKOS.inScheme, concept_scheme_iri
+        ).build()
+    else:
+        # A top-level descriptor. Yield the categories this descriptor belongs to.
+        for tree_number in descriptor.tree_numbers:
+            category = tree_number.category
+            yield interchange.Relationship.builder(
+                descriptor.iri, SKOS.broader, category.iri
+            ).build()
+            yield interchange.Relationship.builder(
+                category.iri, SKOS.narrower, descriptor.iri
+            ).build()
+
+        yield interchange.Relationship.builder(
+            descriptor.iri, SKOS.topConceptOf, concept_scheme_iri
+        ).build()
+        yield interchange.Relationship.builder(
+            concept_scheme_iri, SKOS.hasTopConcept, descriptor.iri
+        ).build()
+
+
+def _transform_descriptor_producer(
+    input_: Thesaurus.Descriptor, work_queue: JoinableQueue
+) -> None:
+    descriptor_iris_batch: list[URIRef] = []
+    with Thesaurus.open(input_, read_only=True) as thesaurus:
+        for descriptor_iri in thesaurus.descriptor_iris():
+            descriptor_iris_batch.append(descriptor_iri)
+            if len(descriptor_iris_batch) == _DESCRIPTOR_BATCH_SIZE:
+                work_queue.put(tuple(descriptor_iris_batch))
+                descriptor_iris_batch = []
+
+    if descriptor_iris_batch:
+        work_queue.put(tuple(descriptor_iris_batch))
 
 
 def transform_thesaurus_to_interchange_models(
     thesaurus_descriptor: Thesaurus.Descriptor,
 ) -> Iterable[interchange.Model]:
     with Thesaurus.open(thesaurus_descriptor, read_only=True) as thesaurus:
-        concept_scheme = thesaurus.concept_scheme
-        yield interchange.Node.builder(iri=concept_scheme.iri).add_type(
+        yield interchange.Node.builder(iri=thesaurus.iri).add_type(
             SKOS.ConceptScheme
-        ).set_modified(concept_scheme.modified).build()
-        yield from __transform_labels(concept_scheme)
+        ).build()
 
-        for concept in thesaurus.concepts():
-            yield from __transform_concept(
-                concept=concept, concept_scheme_iri=concept_scheme.iri
-            )
+        if _IN_PROCESS:
+            for descriptor in thesaurus.descriptors():
+                yield from __transform_descriptor(
+                    concept_scheme_iri=thesaurus.iri, descriptor=descriptor
+                )
+            return
 
-    # yield from parallel_transform(
-    #     consumer=_transform_concept_consumer,
-    #     consumer_input=(concept_scheme.iri, thesaurus_descriptor),
-    #     producer=_transform_concept_producer,
-    #     producer_input=thesaurus_descriptor,
-    # )
+    yield from parallel_transform(
+        consumer=_transform_descriptor_consumer,
+        consumer_input=thesaurus_descriptor,
+        producer=_transform_descriptor_producer,
+        producer_input=thesaurus_descriptor,
+    )
