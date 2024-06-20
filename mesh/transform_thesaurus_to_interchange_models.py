@@ -18,6 +18,8 @@ def __transform_descriptor(
 ) -> Iterable[interchange.Model]:
     yield from __transform_descriptor_labels(descriptor)
 
+    yield from __transform_descriptor_properties(descriptor)
+
     yield from __transform_descriptor_relationships(
         concept_scheme_iri=concept_scheme_iri, descriptor=descriptor
     )
@@ -73,6 +75,19 @@ def __transform_descriptor_labels(
             yield transform_mesh_term_to_interchange_label(
                 term_=term, type_=LabelType.ALTERNATIVE
             )
+
+
+def __transform_descriptor_properties(
+    descriptor: Descriptor,
+) -> Iterable[interchange.Model]:
+    for property_predicate, property_value in (
+        (SKOS.scopeNote, descriptor.preferred_concept.scope_note.value_or(None)),
+    ):
+        if property_value is None:
+            continue
+        yield interchange.Property.builder(
+            descriptor.iri, property_predicate, property_value
+        )
 
 
 def __transform_descriptor_relationships(
