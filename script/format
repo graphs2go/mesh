@@ -4,5 +4,5 @@ set -e
 
 cd "$(dirname "$0")/.."
 
-poetry run isort medline_plus tests
-poetry run black medline_plus tests
+poetry run isort mesh tests
+poetry run black mesh tests

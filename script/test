@@ -4,8 +4,8 @@ set -e
 
 cd "$(dirname "$0")/.."
 
-poetry run black --check medline_plus tests
-poetry run mypy medline_plus tests
-poetry run ruff medline_plus tests
+poetry run black --check mesh tests
+poetry run mypy mesh tests
+poetry run ruff mesh tests
 export PYTHONPATH=$PWD
 poetry run pytest tests

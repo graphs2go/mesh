@@ -24,4 +24,4 @@ graphs2go = { path = "../shared", develop = true }
 isort = "^5.13.2"
 
 [tool.ruff]
-src = ["medline_plus"]
+src = ["mesh"]
