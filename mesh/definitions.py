@@ -4,8 +4,6 @@ from returns.maybe import Some
 from graphs2go.resources import DirectoryInputConfig, OutputConfig, RdfStoreConfig
 from graphs2go.utils import configure_markus, load_dotenv
 from mesh.assets import (
-    cypher_files,
-    interchange_file,
     interchange_graph,
     release,
     thesaurus,
@@ -25,8 +23,6 @@ load_dotenv()
 
 definitions = Definitions(
     assets=[
-        cypher_files,
-        interchange_file,
         interchange_graph,
         release,
         thesaurus,
