@@ -6,6 +6,9 @@ from dagster import (
     asset,
     get_dagster_logger,
 )
+from mesh.transform_thesaurus_to_interchange_models import (
+    transform_thesaurus_to_interchange_models,
+)
 from rdflib import URIRef
 from returns.maybe import Some
 from tqdm import tqdm
@@ -18,11 +21,8 @@ from graphs2go.models import interchange, rdf
 from graphs2go.rdf_stores import RdfStore
 from graphs2go.resources import DirectoryInputConfig, RdfStoreConfig
 from mesh.find_releases import find_releases
-from mesh.models import Release, ReleaseGraph
+from mesh.models import Release, Thesaurus
 from mesh.paths import INPUT_DIRECTORY_PATH
-from mesh.transform_release_graph_to_interchange_models import (
-    transform_release_graph_to_interchange_models,
-)
 
 # Static partitions: scan the release directory once at startup
 releases_partitions_definition = StaticPartitionsDefinition(
@@ -39,15 +39,15 @@ releases_partitions_definition = StaticPartitionsDefinition(
 
 @asset(code_version="1", partitions_def=releases_partitions_definition)
 def interchange_graph(
-    rdf_store_config: RdfStoreConfig, release_graph: ReleaseGraph.Descriptor
+    rdf_store_config: RdfStoreConfig, thesaurus: Thesaurus.Descriptor
 ) -> interchange.Graph.Descriptor:
     with interchange.Graph.create(
         rdf_store_config=rdf_store_config,
-        identifier=URIRef("urn:interchange:" + quote(release_graph.identifier)),
+        identifier=URIRef("urn:interchange:" + quote(thesaurus.identifier)),
     ) as open_interchange_graph:
         return open_interchange_graph.add_all_if_empty(
             lambda: tqdm(
-                transform_release_graph_to_interchange_models(release_graph),
+                transform_thesaurus_to_interchange_models(thesaurus),
                 desc="interchange graph models",
             )
         ).descriptor
@@ -59,9 +59,9 @@ def release(context: AssetExecutionContext) -> Release:
 
 
 @asset(code_version="1", partitions_def=releases_partitions_definition)
-def release_graph(
+def thesaurus(
     rdf_store_config: RdfStoreConfig, release: Release
-) -> ReleaseGraph.Descriptor:
+) -> Thesaurus.Descriptor:
     logger = get_dagster_logger()
 
     with RdfStore.create_(
@@ -83,7 +83,7 @@ def release_graph(
         else:
             logger.info("reusing existing RDF store")
 
-        return ReleaseGraph.Descriptor(
+        return Thesaurus.Descriptor(
             identifier=release.identifier,
             rdf_store_descriptor=rdf_store.descriptor,
         )

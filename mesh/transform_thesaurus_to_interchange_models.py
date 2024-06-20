@@ -1,11 +1,11 @@
 from collections.abc import Iterable
 
-from graphs2go.models import interchange, skos
 from rdflib import SKOS, URIRef
 from returns.maybe import Some
 from returns.pipeline import is_successful
 
-from mesh.models import Concept, Label, ReleaseGraph
+from graphs2go.models import interchange, skos
+from mesh.models import Concept, Label, Thesaurus
 
 _CONCEPT_BATCH_SIZE = 100
 
@@ -80,13 +80,13 @@ def __transform_concept(
 
 
 # def _transform_concept_consumer(
-#     input_: tuple[URIRef, ReleaseGraph.Descriptor],
+#     input_: tuple[URIRef, Thesaurus.Descriptor],
 #     output_queue: Queue,
 #     work_queue: JoinableQueue,
 # ) -> None:
-#     (concept_scheme_iri, release_graph_descriptor) = input_
+#     (concept_scheme_iri, thesaurus_descriptor) = input_
 #
-#     with ReleaseGraph.open(release_graph_descriptor, read_only=True) as release_graph:
+#     with Thesaurus.open(thesaurus_descriptor, read_only=True) as thesaurus:
 #         while True:
 #             concept_iris: tuple[URIRef, ...] | None = work_queue.get()
 #
@@ -99,7 +99,7 @@ def __transform_concept(
 #                 interchange_models.extend(
 #                     __transform_concept(
 #                         concept_scheme_iri=concept_scheme_iri,
-#                         concept=release_graph.concept_by_iri(concept_iri),
+#                         concept=thesaurus.concept_by_iri(concept_iri),
 #                     )
 #                 )
 #             output_queue.put(tuple(interchange_models))
@@ -107,11 +107,11 @@ def __transform_concept(
 #
 #
 # def _transform_concept_producer(
-#     input_: ReleaseGraph.Descriptor, work_queue: JoinableQueue
+#     input_: Thesaurus.Descriptor, work_queue: JoinableQueue
 # ) -> None:
 #     concept_iris_batch: list[URIRef] = []
-#     with ReleaseGraph.open(input_, read_only=True) as release_graph:
-#         for concept_iri in release_graph.concept_iris:
+#     with Thesaurus.open(input_, read_only=True) as thesaurus:
+#         for concept_iri in thesaurus.concept_iris:
 #             concept_iris_batch.append(concept_iri)
 #             if len(concept_iris_batch) == _CONCEPT_BATCH_SIZE:
 #                 work_queue.put(tuple(concept_iris_batch))
@@ -121,24 +121,24 @@ def __transform_concept(
 #         work_queue.put(tuple(concept_iris_batch))
 
 
-def transform_release_graph_to_interchange_models(
-    release_graph_descriptor: ReleaseGraph.Descriptor,
+def transform_thesaurus_to_interchange_models(
+    thesaurus_descriptor: Thesaurus.Descriptor,
 ) -> Iterable[interchange.Model]:
-    with ReleaseGraph.open(release_graph_descriptor, read_only=True) as release_graph:
-        concept_scheme = release_graph.concept_scheme
+    with Thesaurus.open(thesaurus_descriptor, read_only=True) as thesaurus:
+        concept_scheme = thesaurus.concept_scheme
         yield interchange.Node.builder(iri=concept_scheme.iri).add_type(
             SKOS.ConceptScheme
         ).set_modified(concept_scheme.modified).build()
         yield from __transform_labels(concept_scheme)
 
-        for concept in release_graph.concepts():
+        for concept in thesaurus.concepts():
             yield from __transform_concept(
                 concept=concept, concept_scheme_iri=concept_scheme.iri
             )
 
     # yield from parallel_transform(
     #     consumer=_transform_concept_consumer,
-    #     consumer_input=(concept_scheme.iri, release_graph_descriptor),
+    #     consumer_input=(concept_scheme.iri, thesaurus_descriptor),
     #     producer=_transform_concept_producer,
-    #     producer_input=release_graph_descriptor,
+    #     producer_input=thesaurus_descriptor,
     # )

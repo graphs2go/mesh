@@ -1,14 +1,14 @@
 from dagster import Definitions
-from graphs2go.resources import DirectoryInputConfig, OutputConfig, RdfStoreConfig
-from graphs2go.utils import configure_markus, load_dotenv
 from returns.maybe import Some
 
+from graphs2go.resources import DirectoryInputConfig, OutputConfig, RdfStoreConfig
+from graphs2go.utils import configure_markus, load_dotenv
 from mesh.assets import (
     cypher_files,
     interchange_file,
     interchange_graph,
     release,
-    release_graph,
+    thesaurus,
     skos_file,
     skos_graph,
 )
@@ -29,7 +29,7 @@ definitions = Definitions(
         interchange_file,
         interchange_graph,
         release,
-        release_graph,
+        thesaurus,
         skos_file,
         skos_graph,
     ],
