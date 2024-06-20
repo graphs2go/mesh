@@ -16,6 +16,8 @@ _IN_PROCESS = True
 def __transform_descriptor(
     *, concept_scheme_iri: URIRef, descriptor: Descriptor
 ) -> Iterable[interchange.Model]:
+    yield interchange.Node.builder(descriptor.iri).add_type(SKOS.Concept).build()
+
     yield from __transform_descriptor_labels(descriptor)
 
     yield from __transform_descriptor_properties(descriptor)

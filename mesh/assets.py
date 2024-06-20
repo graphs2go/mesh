@@ -61,6 +61,9 @@ def release(context: AssetExecutionContext) -> Release:
 skos_file = build_skos_file_asset(
     partitions_def=Some(releases_partitions_definition),
     rdf_formats=(rdf.Format.NTRIPLES, rdf.Format.TURTLE),
+    rdf_graph_identifier_to_file_stem=Some(
+        lambda identifier: f"mesh{identifier[-4:]}.skos"
+    ),
 )
 
 
