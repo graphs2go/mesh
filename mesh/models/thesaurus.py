@@ -63,3 +63,7 @@ class Thesaurus(rdf.Graph[rdf.Model]):
                     ),
                     thesaurus=self,
                 )
+
+    @property
+    def year(self) -> int:
+        return int(self.identifier)

@@ -17,7 +17,7 @@ class TreeNumber(rdf.NamedModel):
     @property
     def category(self) -> "Category":
         category_letter = self.label.split(".", 1)[0][0]
-        for category in self.__thesaurus.top_concepts():
+        for category in self.__thesaurus.categories:
             if category_letter == category.letter:
                 return category
         raise KeyError("no category found for tree number " + self.label)

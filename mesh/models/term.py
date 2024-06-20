@@ -1,10 +1,10 @@
 from rdflib import Literal
 
-from graphs2go.models import akos, rdf
+from graphs2go.models import rdf
 from mesh.namespaces import MESHV
 
 
-class Term(rdf.NamedModel, akos.Label):
+class Term(rdf.NamedModel):
     """
     A MeSH term.
 
@@ -12,7 +12,7 @@ class Term(rdf.NamedModel, akos.Label):
     """
 
     @property
-    def literal_form(self) -> Literal:
+    def pref_label(self) -> Literal:
         return self.resource.required_value(
             MESHV.prefLabel, rdf.Resource.ValueMappers.literal
         )

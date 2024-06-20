@@ -1,11 +1,6 @@
-from collections.abc import Iterable
 from typing import TYPE_CHECKING
 
-from rdflib import RDF, RDFS, Graph, URIRef, Variable
-
-from graphs2go.models import rdf
-from mesh.models.descriptor import Descriptor
-from mesh.namespaces import MESHV
+from rdflib import URIRef
 
 if TYPE_CHECKING:
     from mesh.models.thesaurus import Thesaurus
@@ -24,43 +19,15 @@ class Category:
     def __init__(
         self,
         *,
-        graph: Graph,
         letter: str,
         pref_label: str,
         thesaurus: "Thesaurus",
     ):
-        self.__graph = graph
         self.__iri = URIRef(
             f"http://id.nlm.nih.gov/mesh/{thesaurus.year}/category/{letter}"
         )
         self.__letter = letter
         self.__pref_label = pref_label
-        self.__thesaurus = thesaurus
-
-    def _narrower_concepts(self, *, transitive: bool) -> Iterable[Descriptor]:
-        result = self.__graph.query(
-            f"""\
-SELECT ?descriptor
-WHERE {{
-    VALUES ?descriptorRdfType {{ {' '.join(f'<{rdf_type}>' for rdf_type in Descriptor.RDF_TYPES)} }}
-    ?descriptor <{RDF.type}> ?descriptorRdfType .
-    ?descriptor <{MESHV.treeNumber}> ?treeNumber .
-    ?treeNumber <{RDFS.label}> ?treeNumberLabel .
-    FILTER (strStarts(?treeNumberLabel, "{self.letter}") && !contains(?treeNumberLabel, "."))
-}}"""
-        )
-
-        for binding in result.bindings:
-            descriptor_iri = binding[Variable("descriptor")]
-            if not isinstance(descriptor_iri, URIRef):
-                continue
-            descriptor = Descriptor(
-                resource=rdf.NamedResource(graph=self.__graph, iri=descriptor_iri),
-                thesaurus=self.__thesaurus,
-            )
-            yield descriptor
-            if transitive:
-                yield from descriptor._narrower_concepts(transitive=True)
 
     @property
     def iri(self) -> URIRef:
