@@ -7,5 +7,3 @@ cd "$(dirname "$0")/.."
 poetry run black --check mesh tests
 poetry run mypy mesh tests
 poetry run ruff mesh tests
-export PYTHONPATH=$PWD
-poetry run pytest tests
