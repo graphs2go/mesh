@@ -14,7 +14,7 @@ from graphs2go.assets import (
     build_skos_file_asset,
     build_skos_graph_asset,
 )
-from graphs2go.models import interchange, rdf
+from graphs2go.models import interchange
 from graphs2go.rdf_stores import RdfStore
 from graphs2go.resources import DirectoryInputConfig, RdfStoreConfig
 from mesh.find_releases import find_releases
@@ -60,7 +60,6 @@ def release(context: AssetExecutionContext) -> Release:
 
 skos_file = build_skos_file_asset(
     partitions_def=Some(releases_partitions_definition),
-    rdf_formats=(rdf.Format.NTRIPLES, rdf.Format.TURTLE),
     rdf_graph_identifier_to_file_stem=Some(
         lambda identifier: f"mesh{identifier[-4:]}.skos"
     ),
