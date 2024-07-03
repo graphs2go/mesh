@@ -151,6 +151,12 @@ def transform_thesaurus_to_interchange_models(
             SKOS.ConceptScheme
         ).build()
 
+        yield interchange.Label.builder(
+            literal_form=Literal("Medical Subject Headings (MeSH)"),
+            subject=thesaurus.iri,
+            type_=Some(LabelType.PREFERRED),
+        ).build()
+
         if _IN_PROCESS:
             for descriptor in thesaurus.descriptors():
                 yield from __transform_descriptor(
