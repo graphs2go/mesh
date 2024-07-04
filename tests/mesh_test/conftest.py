@@ -19,6 +19,11 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.fixture(scope="session")
+def input_config() -> DirectoryInputConfig:
+    return DirectoryInputConfig.default(directory_path_default=INPUT_DIRECTORY_PATH)
+
+
+@pytest.fixture(scope="session")
 def interchange_graph(
     interchange_graph_descriptor: interchange.Graph.Descriptor,
 ) -> Iterable[interchange.Graph]:
@@ -50,11 +55,6 @@ def rdf_store_config() -> RdfStoreConfig:
 @pytest.fixture(scope="session")
 def release(input_config: DirectoryInputConfig) -> Release:
     return find_releases(input_config=input_config)[0]
-
-
-@pytest.fixture(scope="session")
-def input_config() -> DirectoryInputConfig:
-    return DirectoryInputConfig.default(directory_path_default=INPUT_DIRECTORY_PATH)
 
 
 @pytest.fixture(scope="session")

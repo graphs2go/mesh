@@ -6,4 +6,4 @@ cd "$(dirname "$0")/.."
 
 rm -fr data/output/cypher data/output/direct_rdf data/output/interchange data/output/skos
 rm -fr data/oxigraph/urn*
-rm -fr history logs schedules storage
+rm -fr .logs_queue .nux history logs schedules storage
