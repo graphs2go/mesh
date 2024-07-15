@@ -1,13 +1,13 @@
 from collections.abc import Iterable
-from multiprocessing import Queue, JoinableQueue
-
-from rdflib import URIRef, SKOS, Literal
-from returns.maybe import Some
+from multiprocessing import JoinableQueue, Queue
 
 from graphs2go.models import interchange
 from graphs2go.models.label_type import LabelType
 from graphs2go.transformers import parallel_transform
-from mesh.models import Thesaurus, Descriptor, Term
+from rdflib import SKOS, Literal, URIRef
+from returns.maybe import Some
+
+from mesh.models import Descriptor, Term, Thesaurus
 
 _DESCRIPTOR_BATCH_SIZE = 100
 _IN_PROCESS = True

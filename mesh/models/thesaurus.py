@@ -4,9 +4,9 @@ import logging
 from functools import cache
 from typing import TYPE_CHECKING
 
+from graphs2go.models import rdf
 from rdflib import RDF, URIRef
 
-from graphs2go.models import rdf
 from mesh.models.category import Category
 from mesh.models.descriptor import Descriptor
 

@@ -3,11 +3,11 @@ from collections.abc import Iterable
 from pathlib import Path
 
 import pytest
-from returns.maybe import Some
-
 from graphs2go.models import interchange, skos
 from graphs2go.resources import DirectoryInputConfig, OutputConfig, RdfStoreConfig
 from graphs2go.utils import configure_markus, load_dotenv
+from returns.maybe import Some
+
 from mesh import assets
 from mesh.find_releases import find_releases
 from mesh.models import Release, Thesaurus

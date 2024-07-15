@@ -6,17 +6,14 @@ from dagster import (
     asset,
     get_dagster_logger,
 )
+from graphs2go.assets import build_skos_file_asset, build_skos_graph_asset
+from graphs2go.models import interchange
+from graphs2go.rdf_stores import RdfStore
+from graphs2go.resources import DirectoryInputConfig, RdfStoreConfig
 from rdflib import URIRef
 from returns.maybe import Some
 from tqdm import tqdm
 
-from graphs2go.assets import (
-    build_skos_file_asset,
-    build_skos_graph_asset,
-)
-from graphs2go.models import interchange
-from graphs2go.rdf_stores import RdfStore
-from graphs2go.resources import DirectoryInputConfig, RdfStoreConfig
 from mesh.find_releases import find_releases
 from mesh.models import Release, Thesaurus
 from mesh.paths import INPUT_DIRECTORY_PATH

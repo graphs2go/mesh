@@ -1,6 +1,6 @@
 import pytest
-
 from graphs2go.models import interchange
+
 from mesh.models.thesaurus import Thesaurus
 from mesh.transform_thesaurus_to_interchange_models import (
     transform_thesaurus_to_interchange_models,

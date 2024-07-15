@@ -1,9 +1,8 @@
 from functools import cache
 from typing import TYPE_CHECKING
 
-from rdflib import RDFS
-
 from graphs2go.models import rdf
+from rdflib import RDFS
 
 if TYPE_CHECKING:
     from mesh.models.category import Category

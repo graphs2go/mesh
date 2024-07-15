@@ -1,6 +1,6 @@
+from graphs2go.models import rdf
 from rdflib import Literal
 
-from graphs2go.models import rdf
 from mesh.namespaces import MESHV
 
 

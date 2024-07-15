@@ -1,9 +1,9 @@
 from collections.abc import Iterable
 
+from graphs2go.models import rdf
 from rdflib import Literal
 from returns.maybe import Maybe
 
-from graphs2go.models import rdf
 from mesh.models.term import Term
 from mesh.namespaces import MESHV
 

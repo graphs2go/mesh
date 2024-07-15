@@ -1,15 +1,9 @@
 from dagster import Definitions
-from returns.maybe import Some
-
 from graphs2go.resources import DirectoryInputConfig, OutputConfig, RdfStoreConfig
 from graphs2go.utils import configure_markus, load_dotenv
-from mesh.assets import (
-    interchange_graph,
-    release,
-    thesaurus,
-    skos_file,
-    skos_graph,
-)
+from returns.maybe import Some
+
+from mesh.assets import interchange_graph, release, skos_file, skos_graph, thesaurus
 from mesh.jobs import files_job
 from mesh.paths import (
     INPUT_DIRECTORY_PATH,
