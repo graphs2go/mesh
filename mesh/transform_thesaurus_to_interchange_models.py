@@ -1,16 +1,36 @@
 from collections.abc import Iterable
 from multiprocessing import JoinableQueue, Queue
 
-from graphs2go.models import interchange
-from graphs2go.models.label_type import LabelType
-from graphs2go.transformers import parallel_transform
 from rdflib import SKOS, Literal, URIRef
 from returns.maybe import Some
 
-from mesh.models import Descriptor, Term, Thesaurus
+from graphs2go.models import interchange
+from graphs2go.models.label_type import LabelType
+from graphs2go.transformers import parallel_transform
+from mesh.models import Descriptor, Term, Thesaurus, Category
 
 _DESCRIPTOR_BATCH_SIZE = 100
 _IN_PROCESS = True
+
+
+def __transform_category(*, category: Category, concept_scheme_iri: URIRef):
+    # See note in Thesaurus about what categories are.
+
+    yield interchange.Node.builder(category.iri).add_type(SKOS.Concept).build()
+
+    yield interchange.Label.builder(
+        literal_form=Literal(category.pref_label),
+        subject=category.iri,
+        type_=Some(LabelType.PREFERRED),
+    ).build()
+
+    yield interchange.Relationship.builder(
+        category.iri, SKOS.topConceptOf, concept_scheme_iri
+    ).build()
+
+    yield interchange.Relationship.builder(
+        concept_scheme_iri, SKOS.hasTopConcept, category.iri
+    ).build()
 
 
 def __transform_descriptor(
@@ -120,13 +140,6 @@ def __transform_descriptor_relationships(
                 category.iri, SKOS.narrower, descriptor.iri
             ).build()
 
-        yield interchange.Relationship.builder(
-            descriptor.iri, SKOS.topConceptOf, concept_scheme_iri
-        ).build()
-        yield interchange.Relationship.builder(
-            concept_scheme_iri, SKOS.hasTopConcept, descriptor.iri
-        ).build()
-
 
 def _transform_descriptor_producer(
     input_: Thesaurus.Descriptor, work_queue: JoinableQueue
@@ -158,6 +171,11 @@ def transform_thesaurus_to_interchange_models(
         ).build()
 
         if _IN_PROCESS:
+            for category in thesaurus.categories:
+                yield from __transform_category(
+                    category=category, concept_scheme_iri=thesaurus.iri
+                )
+
             for descriptor in thesaurus.descriptors():
                 yield from __transform_descriptor(
                     concept_scheme_iri=thesaurus.iri, descriptor=descriptor
