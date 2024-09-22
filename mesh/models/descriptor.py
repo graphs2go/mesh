@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from graphs2go.models import rdf
-from rdflib import URIRef
 
 from mesh.models.concept import Concept
 from mesh.models.tree_number import TreeNumber
@@ -11,6 +10,8 @@ from mesh.namespaces import MESHV
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
+
+    from rdflib import URIRef
 
     from mesh.models.thesaurus import Thesaurus
 

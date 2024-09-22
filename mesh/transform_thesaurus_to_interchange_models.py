@@ -1,19 +1,21 @@
 from collections.abc import Iterable
 from multiprocessing import JoinableQueue, Queue
 
-from rdflib import SKOS, Literal, URIRef
-from returns.maybe import Some
-
 from graphs2go.models import interchange
 from graphs2go.models.label_type import LabelType
 from graphs2go.transformers import parallel_transform
-from mesh.models import Descriptor, Term, Thesaurus, Category
+from rdflib import SKOS, Literal, URIRef
+from returns.maybe import Some
+
+from mesh.models import Category, Descriptor, Term, Thesaurus
 
 _DESCRIPTOR_BATCH_SIZE = 100
 _IN_PROCESS = True
 
 
-def __transform_category(*, category: Category, concept_scheme_iri: URIRef):
+def __transform_category(
+    *, category: Category, concept_scheme_iri: URIRef
+) -> Iterable[interchange.Model]:
     # See note in Thesaurus about what categories are.
 
     yield interchange.Node.builder(category.iri).add_type(SKOS.Concept).build()
@@ -160,9 +162,11 @@ def transform_thesaurus_to_interchange_models(
     thesaurus_descriptor: Thesaurus.Descriptor,
 ) -> Iterable[interchange.Model]:
     with Thesaurus.open(thesaurus_descriptor, read_only=True) as thesaurus:
-        yield interchange.Node.builder(iri=thesaurus.iri).add_type(
-            SKOS.ConceptScheme
-        ).build()
+        yield (
+            interchange.Node.builder(iri=thesaurus.iri)
+            .add_type(SKOS.ConceptScheme)
+            .build()
+        )
 
         yield interchange.Label.builder(
             literal_form=Literal("Medical Subject Headings (MeSH)"),

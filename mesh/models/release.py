@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os.path
 from base64 import b64decode, b64encode
 from pathlib import Path
 
@@ -13,13 +12,13 @@ class Release:
     """
 
     def __init__(self, file_path: Path):
-        file_stem, file_ext = os.path.splitext(file_path.name.lower())
+        file_stem = Path(file_path.name.lower()).stem
         file_stem_prefix = "mesh"
         if not file_stem.startswith("mesh"):
             raise ValueError(
                 f"{file_path} file name does not start with {file_stem_prefix}"
             )
-        if file_ext != ".nt":
+        if Path(file_path.name.lower()).suffix != ".nt":
             raise ValueError(f"{file_path} does not have .nt extension")
         self.__nt_file_path = file_path
 
