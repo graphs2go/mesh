@@ -1,12 +1,21 @@
-# Medical Subject Heading (MeSH) Thesaurus transformation pipelines
+# Graphs2go: Medical Subject Headings (MeSH)
 
-See the [generic project instructions](../README.md#generic-project-instructions) in the [root README](../README.md).
+Transform the [Medical Subject Headings (MeSH)](https://www.nlm.nih.gov/mesh/meshhome.html) into Cypher and SKOS RDF.
 
-## One-time setup
+## Getting started
 
-### Download the MeSH thesaurus
+### Prerequisites
 
-[Download the MeSH thesaurus in N-Triples](https://nlmpubs.nlm.nih.gov/projects/mesh/rdf/) to `data/input`.
+* [Python](https://www.python.org/)
+* [Python Poetry](https://python-poetry.org/)
+
+### Install Python dependencies
+
+    script/bootstrap
+
+### Download MeSH RDF
+
+[Download the MeSH RDF (.nt) file](https://nlmpubs.nlm.nih.gov/projects/mesh/rdf/) to `data/input`.
 
 The resulting directory tree should resemble:
 
@@ -15,3 +24,13 @@ The resulting directory tree should resemble:
     * `mesh2024.nt`
 
 or similar, depending on the release year.
+
+## Usage
+
+Transform MeSH into Cypher and RDF and serialize them as files in `data/output`:
+
+    jobs/files
+
+Due to a limitation in Dagster, the script will not exit when all the files have been generated. You will have to terminate it with ^C after you see the message:
+
+    Shutting down Dagster code server
