@@ -20,7 +20,7 @@ mypy = "^1.8.0"
 pytest = "^8.0.1"
 ruff = "^0.2.2"
 dagster-webserver = "^1.6.5"
-graphs2go = { path = "../shared", develop = true }
+graphs2go = { path = "../lib", develop = true }
 isort = "^5.13.2"
 
 [tool.ruff]
