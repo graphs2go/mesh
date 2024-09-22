@@ -607,31 +607,29 @@ graphql-core = ">=3.2,<3.3"
 
 [[package]]
 name = "graphs2go"
-version = "0.1.0"
-description = ""
+version = "1.0.0"
+description = "Shared library for Graphs2go pipelines"
 optional = false
-python-versions = "^3.11"
-files = []
-develop = true
+python-versions = "<4.0,>=3.11"
+files = [
+    {file = "graphs2go-1.0.0-py3-none-any.whl", hash = "sha256:f6cc956e43b637fced764c89a30266201a2802105445bf47398ea9dd11f8b972"},
+    {file = "graphs2go-1.0.0.tar.gz", hash = "sha256:429acb892fa8f6b92f71885a1655364bc40fc0d1e3d509c6685ba7dd11df981f"},
+]
 
 [package.dependencies]
-brotli = "^1.1.0"
-dagster = "^1.6.5"
-markus = "^4.2.0"
-pathvalidate = "^3.2.0"
-psycopg = "^3.1.18"
-psycopg-pool = "^3.1.18"
-pyoxigraph = "^0.3.22"
-rdflib = "^7.0.0"
-returns = "^0.23.0"
-stringcase = "^1.2.0"
-tqdm = "^4.66.2"
-types-pytz = "^2024.1.0.20240203"
-types-tqdm = "^4.66.0.20240106"
-
-[package.source]
-type = "directory"
-url = "../lib"
+brotli = ">=1.1.0,<2.0.0"
+dagster = ">=1.6.5,<2.0.0"
+markus = ">=4.2.0,<5.0.0"
+pathvalidate = ">=3.2.0,<4.0.0"
+psycopg = ">=3.1.18,<4.0.0"
+psycopg-pool = ">=3.1.18,<4.0.0"
+pyoxigraph = ">=0.3.22,<0.4.0"
+rdflib = ">=7.0.0,<8.0.0"
+returns = ">=0.23.0,<0.24.0"
+stringcase = ">=1.2.0,<2.0.0"
+tqdm = ">=4.66.2,<5.0.0"
+types-pytz = ">=2024.1.0.20240203,<2025.0.0.0"
+types-tqdm = ">=4.66.0.20240106,<5.0.0.0"
 
 [[package]]
 name = "greenlet"
@@ -2622,4 +2620,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "5c03b4869809bc151a6de8ee535997dffc0f9e78a3412d6ac76798f26b8bb333"
+content-hash = "73110bb5834a6d68fe28ffe48353732e98a43f8dc51557899da2755889246c0e"
