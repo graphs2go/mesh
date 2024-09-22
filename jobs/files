@@ -4,7 +4,7 @@ set -e
 
 cd "$(dirname "$0")/.."
 
-export DAGSTER_HOME=$PWD
+export DAGSTER_HOME=$PWD/data/dagster_home
 poetry run dagster job backfill --all dummytext -j files_job -m mesh --noprompt
 
 tail -f /dev/null
