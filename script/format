@@ -5,4 +5,4 @@ set -e
 cd "$(dirname "$0")/.."
 
 poetry run isort mesh tests
-poetry run black mesh tests
+poetry run ruff format mesh tests

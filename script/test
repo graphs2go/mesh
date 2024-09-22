@@ -4,6 +4,6 @@ set -e
 
 cd "$(dirname "$0")/.."
 
-poetry run black --check mesh tests
+poetry run ruff format --check mesh tests
+poetry run ruff check mesh tests
 poetry run mypy mesh tests
-poetry run ruff mesh tests
