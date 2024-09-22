@@ -4,6 +4,6 @@ set -e
 
 cd "$(dirname "$0")/.."
 
+rm -fr data/dagster_home/.logs_queue data/dagster_home/.nux data/dagster_home/history data/dagster_home/logs data/dagster_home/schedules data/dagster_home/storage
 rm -fr data/output/cypher data/output/direct_rdf data/output/interchange data/output/skos
 rm -fr data/oxigraph/urn*
-rm -fr .logs_queue .nux history logs schedules storage
