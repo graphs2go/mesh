@@ -6,7 +6,7 @@ Transform the [Medical Subject Headings (MeSH)](https://www.nlm.nih.gov/mesh/mes
 
 ### Prerequisites
 
-* [Python](https://www.python.org/)
+* [Python 3.12](https://www.python.org/)
 * [Python Poetry](https://python-poetry.org/)
 
 ### Install Python dependencies
