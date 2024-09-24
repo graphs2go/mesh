@@ -2,6 +2,10 @@
 
 Transform the [Medical Subject Headings (MeSH)](https://www.nlm.nih.gov/mesh/meshhome.html) into Cypher and SKOS RDF.
 
+## Download transformed data
+
+See the [Releases page](https://github.com/graphs2go/mesh/releases).
+
 ## Getting started
 
 ### Prerequisites
@@ -34,3 +38,7 @@ Transform MeSH into Cypher and RDF and serialize them as files in `data/output`:
 Due to a limitation in Dagster, the script will not exit when all the files have been generated. You will have to terminate it with ^C after you see the message:
 
     Shutting down Dagster code server
+
+## Credits
+
+MeSH is provided by the [National Library of Medicine](https://www.nlm.nih.gov/databases/download/terms_and_conditions_mesh.html).
