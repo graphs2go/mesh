@@ -13,15 +13,16 @@ readme = "README.md"
 version = "0.1.0"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = ">=3.12,<3.13"
 
 [tool.poetry.group.dev.dependencies]
-mypy = "^1.8.0"
-pytest = "^8.0.1"
-ruff = "^0.6.7"
-dagster-webserver = "^1.6.5"
-graphs2go = "1.0.0"
-isort = "^5.13.2"
+black = "^25.1.0"
+mypy = "^1.15.0"
+pytest = "^8.3.5"
+ruff = "^0.11.0"
+dagster-webserver = "^1.10"
+graphs2go = "1.0.2"
+isort = "^6.0.1"
 
 [tool.ruff]
 src = ["mesh"]
